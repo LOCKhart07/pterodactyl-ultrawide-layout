@@ -1,0 +1,11 @@
+{
+    "description": "Stretches the panel, console and graphs across 21:9 and 32:9 monitors. Works with any theme.",
+    "autoload": {
+        "psr-4": {
+            "UltrawideLayout\\": "src/"
+        }
+    },
+    "config": {
+        "autoloader-suffix": "UltrawideLayoutExtension"
+    }
+}

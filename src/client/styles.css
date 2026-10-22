@@ -1,0 +1,71 @@
+/*
+ * Ultrawide (21:9, 32:9) layout for Pterodactyl 2.0, for use with any theme.
+ *
+ * This file is plain CSS with no Tailwind layers. It loads after the panel's and the active theme's
+ * stylesheets, so its rules apply on top of them. The width is set through the panel's layout tokens
+ * (SDK THEMES.md > Reference > Tokens):
+ *   --layout-content-width  max-w-panel and page-width read it; classic caps it at 75rem.
+ *   --layout-gutter         the least space beside page content.
+ *   --layout-page-spacing   space above and below a page.
+ * The --uw-* values below are defaults. Once someone signs in, the admin settings overwrite them
+ * (src/client/apply.ts). Colours, radius and interactive components are left alone.
+ *
+ * `html:root` outranks a theme's `:root` and `.dark` declarations of the same tokens.
+ */
+html:root {
+    --uw-edge-max: 3rem;
+    --uw-max-width: 100%;
+    --uw-console-aside: 24rem;
+    --uw-console-height-max: 60rem;
+
+    /* 1rem on phones, growing with the window up to --uw-edge-max. */
+    --uw-edge: clamp(min(1rem, var(--uw-edge-max)), 1.5vw + 0.25rem, var(--uw-edge-max));
+
+    --layout-content-width: var(--uw-max-width);
+    --layout-gutter: var(--uw-edge);
+}
+
+@media (min-width: 100rem) {
+    html:root {
+        --layout-page-spacing: calc(var(--spacing, 0.25rem) * 8);
+    }
+}
+
+/*
+ * Shells built on max-w-panel (the top navigation bar, the admin layout, and server/account sub-navigation
+ * in side mode) keep the edge spacing themselves. The page-width content inside them drops its own gutter
+ * so it is not applied twice.
+ */
+.max-w-panel {
+    padding-inline: var(--uw-edge);
+    --layout-gutter: 0px;
+}
+
+/* The navigation bar's logo already has 1rem of padding: take that off so it lines up with the page below. */
+.max-w-panel:has(> #logo) {
+    padding-inline: max(0px, var(--uw-edge) - 1rem);
+}
+
+/*
+ * Console page (classic's layout, which Theme Studio and other themes keep). The title/power row and
+ * the terminal/stats row are 3/4 + 1/4 of a four-column grid, which makes the power buttons and stat
+ * tiles ~1280px wide at 5120px. From 2200px the side column gets a fixed width and the terminal takes the
+ * rest. The terminal (FitAddon.observeResize) and the graphs (ResizeObserver) refit on their own. The
+ * "Reflow the console" setting turns this off.
+ */
+@media (min-width: 137.5rem) {
+    html:not([data-uw-console='off']) .grid.grid-cols-4:has(> .lg\:col-span-3):has(> .lg\:col-span-1) {
+        grid-template-columns: minmax(0, 1fr) var(--uw-console-aside);
+    }
+
+    html:not([data-uw-console='off']) .grid.grid-cols-4:has(> .lg\:col-span-3):has(> .lg\:col-span-1) > * {
+        grid-column: auto;
+    }
+}
+
+/* On tall-enough screens the console grows with the window instead of staying at its 16rem minimum. */
+@media (min-width: 100rem) and (min-height: 56rem) {
+    html:not([data-uw-console='off']) .bg-terminal[class~='min-h-[16rem]'] {
+        min-height: clamp(16rem, 100vh - 30rem, var(--uw-console-height-max));
+    }
+}
